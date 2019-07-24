@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: zuulServer
+
+server:
+  port: 80
+
+## eureka 客户端基本配置
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}
+  client:
+    serviceUrl:
+      defaultZone: http://admin:pass@localhost:9000/eureka
+    healthcheck:
+      enabled: true
+
+zuul:
+  ignoredServices: '*' # 忽略所有请求
+  host:
+    connect-timeout-millis: 3000
+    socket-timeout-millis: 3000
+  routes:
+    resourceServer: /resourceServer/**
+    oauthServer: /oauthServer/**
+    ssologinServer: /ssologinServer/**
+  add-proxy-headers: true
+
+
+security:
+  oauth2:
+    client:
+      access-token-uri: http://my.cloud.com/oauthServer/oauth/token
+      client-id: client_2
+      client-secret: 123456
+      user-authorization-uri: http://my.cloud.com/oauthServer/oauth/authorize
+    resource:
+      user-info-uri: http://my.cloud.com/oauthServer/user
+      prefer-token-info: false
+

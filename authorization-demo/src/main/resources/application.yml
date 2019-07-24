@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: oauthServer
+  ## redis 配置
+  redis:
+    database: 2
+    host: 112.74.43.136
+    port: 6379
+    password: jingbaobao
+
+server:
+  port: 8200
+
+## eureka 客户端基本配置
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}
+  client:
+    serviceUrl:
+      defaultZone: http://admin:pass@localhost:9000/eureka
+    healthcheck:
+      enabled: true

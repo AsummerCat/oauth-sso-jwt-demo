@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: resourceServer
+
+server:
+  port: 8300
+
+## eureka 客户端基本配置
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}
+  client:
+    serviceUrl:
+      defaultZone: http://admin:pass@localhost:9000/eureka
+    healthcheck:
+      enabled: true
+
+auth-server: http://my.oauth.com:8200
+
+security:
+  oauth2:
+    client:
+      client-id: client
+      client-secret: 123456
+      access-token-uri: ${auth-server}/oauth/token
+      user-authorization-uri: ${auth-server}/oauth/authorize
+    resource:
+      user-info-uri: ${auth-server}/oauth/check_token
+#      prefer-token-info: false
