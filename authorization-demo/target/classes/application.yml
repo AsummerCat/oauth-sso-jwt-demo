@@ -3,7 +3,7 @@ spring:
     name: oauthServer
   ## redis 配置
   redis:
-    database: 2
+    database: 6
     host: 112.74.43.136
     port: 6379
     password: jingbaobao

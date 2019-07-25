@@ -26,5 +26,5 @@ security:
       access-token-uri: ${auth-server}/oauth/token
       user-authorization-uri: ${auth-server}/oauth/authorize
     resource:
-      user-info-uri: ${auth-server}/oauth/check_token
-#      prefer-token-info: false
+      jwt:
+        key-uri: ${auth-server}/oauth/token_key

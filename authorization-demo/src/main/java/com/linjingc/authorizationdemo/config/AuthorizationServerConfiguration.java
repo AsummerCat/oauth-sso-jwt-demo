@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -34,8 +33,8 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     @Qualifier("authenticationManagerBean")
     private AuthenticationManager authenticationManager;
 
-    @Autowired
-    RedisTemplate redisTemplate;
+//    @Autowired
+//    RedisTemplate redisTemplate;
 
 
     /**
@@ -55,7 +54,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
                 .authorizedGrantTypes("password", "authorization_code", "refresh_token")
                 .scopes("all")
                 .accessTokenValiditySeconds(3600)
-                .redirectUris("http://localhost:8600/login")
+                .redirectUris("http://my.cloud.com/login")
                 .autoApprove(true);
     }
 
@@ -86,7 +85,9 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
         //访问tokenkey时需要经过认证
-        security.tokenKeyAccess("isAuthenticated()");
+//        security.tokenKeyAccess("isAuthenticated()");
+        security.allowFormAuthenticationForClients().tokenKeyAccess("permitAll()")//公开/oauth/token的接口
+                .checkTokenAccess("permitAll()");
         //security.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()");
         // .allowFormAuthenticationForClients(); //允许表单认证  这段代码在授权码模式下会导致无法根据code　获取token　
 
@@ -112,9 +113,9 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     public JwtAccessTokenConverter jwtAccessTokenConverter() {
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
         converter.setSigningKey("linjingc");
-        String salt = BCrypt.gensalt(); // 实时生成加密的salt
+//        String salt = BCrypt.gensalt(); // 实时生成加密的salt
         // redisTemplate.opsForValue().set("token:" + user.getUsername(), salt, 3600, TimeUnit.SECONDS);
-        converter.setSigner(new MacSigner(salt));
+//        converter.setSigner(new MacSigner(salt));
         return converter;
     }
 

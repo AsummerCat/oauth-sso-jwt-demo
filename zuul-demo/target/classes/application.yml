@@ -22,20 +22,26 @@ zuul:
     connect-timeout-millis: 3000
     socket-timeout-millis: 3000
   routes:
-    resourceServer: /resourceServer/**
-    oauthServer: /oauthServer/**
-    ssologinServer: /ssologinServer/**
-  add-proxy-headers: true
+    resourceServer: /1/**
+    oauthServer: /2/**
+    ssoLoginServer: /3/**
 
+  add-proxy-headers: true
+  add-host-header: true
+  sensitive-headers: Cookie,Set-Cookie
+
+
+auth-server: http://my.oauth.com:8200
 
 security:
   oauth2:
     client:
-      access-token-uri: http://my.cloud.com/oauthServer/oauth/token
-      client-id: client_2
+      client-id: client
       client-secret: 123456
-      user-authorization-uri: http://my.cloud.com/oauthServer/oauth/authorize
+      access-token-uri: ${auth-server}/oauth/token
+      user-authorization-uri: ${auth-server}/oauth/authorize
     resource:
-      user-info-uri: http://my.cloud.com/oauthServer/user
-      prefer-token-info: false
+      jwt:
+        key-uri: ${auth-server}/oauth/token_key
+        key-value: linjingc
 
