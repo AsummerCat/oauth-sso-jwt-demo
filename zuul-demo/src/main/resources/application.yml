@@ -17,7 +17,7 @@ eureka:
       enabled: true
 
 zuul:
-  ignoredServices: '*' # 忽略所有请求
+  ##ignoredServices: '*' # 忽略所有请求
   host:
     connect-timeout-millis: 3000
     socket-timeout-millis: 3000
