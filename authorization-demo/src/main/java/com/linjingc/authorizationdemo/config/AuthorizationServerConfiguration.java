@@ -3,21 +3,30 @@ package com.linjingc.authorizationdemo.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.jwt.crypto.sign.MacSigner;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 授权服务
@@ -67,7 +76,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints
-                .tokenStore(tokenStore()).accessTokenConverter(jwtAccessTokenConverter())
+                .tokenStore(tokenStore()).accessTokenConverter(jwtAccessTokenConverter()).tokenEnhancer(jwtAccessTokenConverter())
                 .authenticationManager(authenticationManager)
                 //允许 GET、POST 请求获取 token，即访问端点：oauth/token
                 .allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST)
@@ -120,20 +129,30 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     }
 
 
-    //@Bean
-    //public TokenEnhancer tokenEnhancer() {
-    //    return new CustomTokenEnhancer();
-    //}
-    //
-    //public class CustomTokenEnhancer implements TokenEnhancer {
-    //    @Override
-    //    public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
-    //        Map<String, Object> additionalInfo = new HashMap<>();
-    //        additionalInfo.put("organization", authentication.getName());
-    //        ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
-    //        return accessToken;
-    //    }
-//}
+
+    /**
+     * 用于扩展JWT
+     * @return
+     */
+    @Bean
+    @ConditionalOnMissingBean(name = "jwtTokenEnhancer")
+    public TokenEnhancer jwtTokenEnhancer(){
+        return new MyJwtTokenEnhancer();
+    }
+
+
+    public class MyJwtTokenEnhancer implements TokenEnhancer {
+        @Override
+        public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
+            final Map<String, Object> additionalInfo = new HashMap<>();
+            User user = (User) authentication.getUserAuthentication().getPrincipal();
+            additionalInfo.put("username", user.getUsername());
+            additionalInfo.put("authorities_", user.getAuthorities());
+
+            ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
+            return accessToken;
+        }
+    }
 
 /**
  * String salt = BCrypt.gensalt(); // 实时生成加密的salt
