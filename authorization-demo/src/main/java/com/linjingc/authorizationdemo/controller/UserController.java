@@ -21,14 +21,6 @@ import java.security.Principal;
 public class UserController {
     @Autowired
     private TokenStore tokenStore;
-
-    @ResponseBody
-    @RequestMapping(value = "/user")
-    public Authentication user(Authentication user) {
-        return user;
-    }
-
-
     /**
      * 删除token
      *

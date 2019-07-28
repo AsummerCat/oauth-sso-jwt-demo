@@ -2,16 +2,13 @@ package com.linjingc.authorizationdemo.config;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.jwt.crypto.sign.MacSigner;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -39,12 +36,7 @@ import java.util.Map;
 public class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdapter {
 
     @Autowired
-    @Qualifier("authenticationManagerBean")
     private AuthenticationManager authenticationManager;
-
-//    @Autowired
-//    RedisTemplate redisTemplate;
-
 
     /**
      * 声明单个客户端及其属性 最少一个 不然无法启动
@@ -65,7 +57,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
                 .accessTokenValiditySeconds(60)
                 .redirectUris("http://my.cloud.com/login")
                 .autoApprove(true)
-        .refreshTokenValiditySeconds(200);
+                .refreshTokenValiditySeconds(200);
     }
 
     /**
@@ -99,8 +91,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
         security.allowFormAuthenticationForClients().tokenKeyAccess("permitAll()")//公开/oauth/token的接口
                 .checkTokenAccess("permitAll()");
         //security.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()");
-        // .allowFormAuthenticationForClients(); //允许表单认证  这段代码在授权码模式下会导致无法根据code　获取token　
-
+        // .allowFormAuthenticationForClients();
     }
 
 
@@ -123,25 +114,24 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     public JwtAccessTokenConverter jwtAccessTokenConverter() {
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
         converter.setSigningKey("linjingc");
-//        String salt = BCrypt.gensalt(); // 实时生成加密的salt
-        // redisTemplate.opsForValue().set("token:" + user.getUsername(), salt, 3600, TimeUnit.SECONDS);
-//        converter.setSigner(new MacSigner(salt));
         return converter;
     }
 
 
-
     /**
      * 用于扩展JWT
+     *
      * @return
      */
     @Bean
     @ConditionalOnMissingBean(name = "jwtTokenEnhancer")
-    public TokenEnhancer jwtTokenEnhancer(){
+    public TokenEnhancer jwtTokenEnhancer() {
         return new MyJwtTokenEnhancer();
     }
 
-
+    /**
+     * 扩展token内容
+     */
     public class MyJwtTokenEnhancer implements TokenEnhancer {
         @Override
         public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
@@ -154,18 +144,4 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
             return accessToken;
         }
     }
-
-/**
- * String salt = BCrypt.gensalt(); // 实时生成加密的salt
- * redisTemplate.opsForValue().set("token:"+user.getUsername(), salt, 3600, TimeUnit.SECONDS);
- * <p>
- * Algorithm algorithm = Algorithm.HMAC256(salt);
- * //Date date = new Date(System.currentTimeMillis()+3600*1000);  //设置1小时后过期
- * <p>
- * return JWT.create()
- * .withSubject(user.getUsername())
- * .withExpiresAt(DateUtils.addDays(new Date(), 1))
- * .withIssuedAt(new Date())
- * .sign(algorithm);
- */
 }

@@ -59,7 +59,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.formLogin().loginPage("/authentication/require")
                 .loginProcessingUrl("/authentication/form")
                 .and().authorizeRequests()
-                .antMatchers("/authentication/require", "/authentication/form","/oauth/exit")
+                .antMatchers("/authentication/require", "/authentication/form", "/oauth/exit")
                 .permitAll()
                 .anyRequest().authenticated()
                 .and()
@@ -76,8 +76,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         web.ignoring().antMatchers("/css/**");
         web.ignoring().antMatchers("/js/**");
         web.ignoring().antMatchers("/images/**");
-        //解决服务注册url被拦截的问题
         web.ignoring().antMatchers("/resources/**");
-
     }
 }
