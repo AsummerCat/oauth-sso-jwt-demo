@@ -4,6 +4,9 @@ spring:
 
 server:
   port: 80
+  servlet:
+    session:
+      timeout: 1m
 
 ## eureka 客户端基本配置
 eureka:

@@ -59,7 +59,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.formLogin().loginPage("/authentication/require")
                 .loginProcessingUrl("/authentication/form")
                 .and().authorizeRequests()
-                .antMatchers("/authentication/require", "/authentication/form")
+                .antMatchers("/authentication/require", "/authentication/form","/oauth/exit")
                 .permitAll()
                 .anyRequest().authenticated()
                 .and()

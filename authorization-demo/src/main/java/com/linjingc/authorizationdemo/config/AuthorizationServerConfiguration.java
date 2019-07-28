@@ -62,9 +62,10 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
                 .secret(finalSecret)
                 .authorizedGrantTypes("password", "authorization_code", "refresh_token")
                 .scopes("all")
-                .accessTokenValiditySeconds(3600)
+                .accessTokenValiditySeconds(60)
                 .redirectUris("http://my.cloud.com/login")
-                .autoApprove(true);
+                .autoApprove(true)
+        .refreshTokenValiditySeconds(200);
     }
 
     /**

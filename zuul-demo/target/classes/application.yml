@@ -4,6 +4,9 @@ spring:
 
 server:
   port: 80
+  servlet:
+    session:
+      timeout: 1m
 
 ## eureka 客户端基本配置
 eureka:
@@ -17,7 +20,7 @@ eureka:
       enabled: true
 
 zuul:
-  ignoredServices: '*' # 忽略所有请求
+  ##ignoredServices: '*' # 忽略所有请求
   host:
     connect-timeout-millis: 3000
     socket-timeout-millis: 3000

@@ -22,8 +22,8 @@ public class UserController {
     @Autowired
     private TokenStore tokenStore;
 
-    @RequestMapping(value = "/user", method = RequestMethod.GET,
-            produces = "application/json; charset=utf-8")
+    @ResponseBody
+    @RequestMapping(value = "/user")
     public Authentication user(Authentication user) {
         return user;
     }
