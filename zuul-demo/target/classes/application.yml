@@ -35,6 +35,8 @@ zuul:
 
 
 auth-server: http://my.oauth.com:8200
+# 退出sso的目标方法地址
+auth-server-logout-method: oauth/exit
 
 security:
   oauth2:
@@ -47,4 +49,5 @@ security:
       jwt:
         key-uri: ${auth-server}/oauth/token_key
         key-value: linjingc
+
 

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.User;
@@ -21,6 +22,7 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +39,10 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    RedisConnectionFactory redisConnectionFactory;
+
 
     /**
      * 声明单个客户端及其属性 最少一个 不然无法启动
@@ -88,8 +94,8 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
         //访问tokenkey时需要经过认证
 //        security.tokenKeyAccess("isAuthenticated()");
-        security.allowFormAuthenticationForClients().tokenKeyAccess("permitAll()")//公开/oauth/token的接口
-                .checkTokenAccess("permitAll()");
+//        security.allowFormAuthenticationForClients().tokenKeyAccess("permitAll()")//公开/oauth/token的接口
+                //.checkTokenAccess("permitAll()");
         //security.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()");
         // .allowFormAuthenticationForClients();
     }
@@ -100,9 +106,15 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
      *
      * @return
      */
+    //@Bean
+    //public TokenStore tokenStore() {
+    //    return new JwtTokenStore(jwtAccessTokenConverter());
+    //}
+
+
     @Bean
     public TokenStore tokenStore() {
-        return new JwtTokenStore(jwtAccessTokenConverter());
+        return new RedisTokenStore(redisConnectionFactory);
     }
 
     /**

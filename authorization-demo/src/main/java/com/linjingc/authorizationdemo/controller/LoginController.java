@@ -1,6 +1,11 @@
 package com.linjingc.authorizationdemo.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +22,8 @@ import java.io.IOException;
  */
 @Controller
 public class LoginController {
+    @Autowired
+    private TokenStore tokenStore;
 
     @RequestMapping("/")
     @ResponseBody
@@ -36,16 +43,32 @@ public class LoginController {
      * 退出操作
      */
     @RequestMapping("oauth/exit")
+    //@ResponseBody
     public void exit(HttpServletRequest request, HttpServletResponse response) {
-        // token can be revoked here if needed
+        //首先移除认证服务器上的session
         new SecurityContextLogoutHandler().logout(request, null, null);
         try {
+            String token = request.getHeader("Authorization");
+            if (token != null) {
+                String tokenValue = token.replace("bearer ", "").trim();
+                OAuth2AccessToken oAuth2AccessToken = tokenStore.readAccessToken(tokenValue);
+                if (oAuth2AccessToken != null) {
+                    //移除access_token
+                    tokenStore.removeAccessToken(oAuth2AccessToken);
+                    //移除refresh_token
+                    tokenStore.removeRefreshToken(oAuth2AccessToken.getRefreshToken());
+                }
+            }
             //sending back to client app
             System.out.println("退出授权服务器");
-            response.sendRedirect(request.getHeader("referer"));
-        } catch (IOException e) {
+            //response.sendRedirect("http://my.cloud.com");
+            response.setHeader("Location","http://my.cloud.com");
+            //return "注销成功";
+        } catch (Exception e) {
             e.printStackTrace();
         }
+        //return "注销失败";
+
     }
 
 
