@@ -1,6 +1,5 @@
 package com.linjingc.zuuldemo.config;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -20,7 +19,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
@@ -42,8 +40,7 @@ public class MySsoLogoutHandler extends SecurityContextLogoutHandler implements 
         Object details = authentication.getDetails();
         if (details.getClass().isAssignableFrom(OAuth2AuthenticationDetails.class)) {
 
-            String accessToken = ((OAuth2AuthenticationDetails)details).getTokenValue();
-            //LOGGER.debug("token: {}",accessToken);
+            String accessToken = ((OAuth2AuthenticationDetails) details).getTokenValue();
 
             RestTemplate restTemplate = new RestTemplate();
 
@@ -60,18 +57,10 @@ public class MySsoLogoutHandler extends SecurityContextLogoutHandler implements 
             restTemplate.setMessageConverters(Arrays.asList(new HttpMessageConverter[]{formHttpMessageConverter, stringHttpMessageConverternew}));
             try {
                 ResponseEntity<String> response = restTemplate.exchange(logoutUrl, HttpMethod.POST, request, String.class);
-            } catch(HttpClientErrorException e) {
+            } catch (HttpClientErrorException e) {
                 //LOGGER.error("HttpClientErrorException invalidating token with SSO authorization server. response.status code: {}, server URL: {}", e.getStatusCode(), logoutUrl);
             }
-            httpServletRequest.getSession().invalidate();
-            for (Cookie cookie : httpServletRequest.getCookies()) {
-                String cookiePath = httpServletRequest.getContextPath() + "/";
-                cookie.setPath(cookiePath);
-                cookie.setMaxAge(0);
-                httpServletResponse.addCookie(cookie);
-            }
-            //最后调用本地session移除掉
-            super.logout(httpServletRequest,httpServletResponse,authentication);
+
         }
     }
 }

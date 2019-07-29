@@ -61,8 +61,7 @@ public class LoginController {
             }
             //sending back to client app
             System.out.println("退出授权服务器");
-            //response.sendRedirect("http://my.cloud.com");
-            response.setHeader("Location","http://my.cloud.com");
+            response.sendRedirect(request.getHeader("referer"));
             //return "注销成功";
         } catch (Exception e) {
             e.printStackTrace();
