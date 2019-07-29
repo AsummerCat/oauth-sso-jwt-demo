@@ -27,4 +27,6 @@ security:
       user-authorization-uri: ${auth-server}/oauth/authorize
     resource:
       jwt:
+        key-value: linjingc
         key-uri: ${auth-server}/oauth/token_key
+

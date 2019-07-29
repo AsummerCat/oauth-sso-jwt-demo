@@ -43,7 +43,6 @@ public class LoginController {
      * 退出操作
      */
     @RequestMapping("oauth/exit")
-    //@ResponseBody
     public void exit(HttpServletRequest request, HttpServletResponse response) {
         //首先移除认证服务器上的session
         new SecurityContextLogoutHandler().logout(request, null, null);
@@ -62,12 +61,9 @@ public class LoginController {
             //sending back to client app
             System.out.println("退出授权服务器");
             response.sendRedirect(request.getHeader("referer"));
-            //return "注销成功";
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //return "注销失败";
-
     }
 
 

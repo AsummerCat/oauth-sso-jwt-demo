@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 
 /**
- * 自定义oauth2 注销方法
+ * @deprecated 自定义oauth2 注销方法
  */
 
 @Component
@@ -36,7 +36,6 @@ public class MySsoLogoutHandler extends SecurityContextLogoutHandler implements 
 
     @Override
     public void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) {
-        //LOGGER.debug("executing MySsoLogoutHandler.logout");
         Object details = authentication.getDetails();
         if (details.getClass().isAssignableFrom(OAuth2AuthenticationDetails.class)) {
 

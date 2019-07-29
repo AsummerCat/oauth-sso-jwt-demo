@@ -18,9 +18,4 @@ public class ZuulDemoApplication {
     public static void main(String[] args) {
         SpringApplication.run(ZuulDemoApplication.class, args);
     }
-    @Bean
-    public OAuth2RestOperations oAuth2RestOperations(OAuth2ClientContext oauth2ClientContext, OAuth2ProtectedResourceDetails details) {
-        OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(details, oauth2ClientContext);
-        return oAuth2RestTemplate;
-    }
 }

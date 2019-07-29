@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * @author cxc
+ * 进入首页方法
+ */
 @Controller
 public class IndexController {
     @RequestMapping("/")
@@ -27,13 +31,4 @@ public class IndexController {
     public Authentication user(Authentication user) {
         return user;
     }
-
-    @GetMapping("/info")
-    @ResponseBody
-    public void user(HttpServletRequest request) {
-        request.getSession().getAttributeNames();
-        request.getHeaderNames();
-        request.getCookies();
-    }
-
 }

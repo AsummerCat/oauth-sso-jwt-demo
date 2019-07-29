@@ -31,7 +31,6 @@ public class UserController {
 
 
     @GetMapping("auth/test1")
-    //@PreAuthorize("hasAuthority('user:add')")
     public String authTest1() {
         return "您拥有'user:add'权限";
     }

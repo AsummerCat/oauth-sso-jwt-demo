@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.User;
@@ -22,7 +21,6 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
-import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,10 +37,6 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 
     @Autowired
     private AuthenticationManager authenticationManager;
-
-    @Autowired
-    RedisConnectionFactory redisConnectionFactory;
-
 
     /**
      * 声明单个客户端及其属性 最少一个 不然无法启动
@@ -75,7 +69,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints
-                .tokenStore(tokenStore())
+                .tokenStore(tokenStore()).accessTokenConverter(jwtAccessTokenConverter())
                 .authenticationManager(authenticationManager)
                 //允许 GET、POST 请求获取 token，即访问端点：oauth/token
                 .allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST)
@@ -93,11 +87,10 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
         //访问tokenkey时需要经过认证
-        //security.tokenKeyAccess("isAuthenticated()");
-        security.allowFormAuthenticationForClients().tokenKeyAccess("permitAll()")//公开/oauth/token的接口
-                .checkTokenAccess("permitAll()");
-        //security.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()");
-        // .allowFormAuthenticationForClients();
+        //security.allowFormAuthenticationForClients().tokenKeyAccess("permitAll()")//公开/oauth/token的接口
+        //        .checkTokenAccess("permitAll()")
+        security.tokenKeyAccess("permitAll()").checkTokenAccess("permitAll()")
+        .allowFormAuthenticationForClients();
     }
 
 
@@ -106,54 +99,48 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
      *
      * @return
      */
-    //@Bean
-    //public TokenStore tokenStore() {
-    //    return new JwtTokenStore(jwtAccessTokenConverter());
-    //}
-
-
     @Bean
     public TokenStore tokenStore() {
-        return new RedisTokenStore(redisConnectionFactory);
+        return new JwtTokenStore(jwtAccessTokenConverter());
     }
 
-    ///**
-    // * 生成JTW token
-    // *
-    // * @return
-    // */
-    //@Bean
-    //public JwtAccessTokenConverter jwtAccessTokenConverter() {
-    //    JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
-    //    converter.setSigningKey("linjingc");
-    //    return converter;
-    //}
-    //
-    //
-    ///**
-    // * 用于扩展JWT
-    // *
-    // * @return
-    // */
-    //@Bean
-    //@ConditionalOnMissingBean(name = "jwtTokenEnhancer")
-    //public TokenEnhancer jwtTokenEnhancer() {
-    //    return new MyJwtTokenEnhancer();
-    //}
+    /**
+     * 生成JTW token
+     *
+     * @return
+     */
+    @Bean
+    public JwtAccessTokenConverter jwtAccessTokenConverter() {
+        JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+        converter.setSigningKey("linjingc");
+        return converter;
+    }
 
-    ///**
-    // * 扩展token内容
-    // */
-    //public class MyJwtTokenEnhancer implements TokenEnhancer {
-    //    @Override
-    //    public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
-    //        final Map<String, Object> additionalInfo = new HashMap<>();
-    //        User user = (User) authentication.getUserAuthentication().getPrincipal();
-    //        additionalInfo.put("username", user.getUsername());
-    //        additionalInfo.put("authorities_", user.getAuthorities());
-    //
-    //        ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
-    //        return accessToken;
-    //    }
-    //}
+
+    /**
+     * 用于扩展JWT
+     *
+     * @return
+     */
+    @Bean
+    @ConditionalOnMissingBean(name = "jwtTokenEnhancer")
+    public TokenEnhancer jwtTokenEnhancer() {
+        return new MyJwtTokenEnhancer();
+    }
+
+    /**
+     * 扩展token内容
+     */
+    public class MyJwtTokenEnhancer implements TokenEnhancer {
+        @Override
+        public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
+            final Map<String, Object> additionalInfo = new HashMap<>();
+            User user = (User) authentication.getUserAuthentication().getPrincipal();
+            additionalInfo.put("username", user.getUsername());
+            additionalInfo.put("authorities_", user.getAuthorities());
+
+            ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
+            return accessToken;
+        }
+    }
 }
