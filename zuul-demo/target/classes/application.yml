@@ -50,3 +50,4 @@ security:
         key-value: linjingc
         key-uri: ${auth-server}/oauth/token_key
 
+

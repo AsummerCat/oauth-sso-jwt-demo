@@ -89,8 +89,9 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
         //访问tokenkey时需要经过认证
         //security.allowFormAuthenticationForClients().tokenKeyAccess("permitAll()")//公开/oauth/token的接口
         //        .checkTokenAccess("permitAll()")
-        security.tokenKeyAccess("permitAll()").checkTokenAccess("permitAll()")
-        .allowFormAuthenticationForClients();
+        security.tokenKeyAccess("permitAll()")         //能够获取token的
+                .checkTokenAccess("isAuthenticated()");     //检测是否认证
+        //.allowFormAuthenticationForClients();
     }
 
 
@@ -112,7 +113,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     @Bean
     public JwtAccessTokenConverter jwtAccessTokenConverter() {
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
-        converter.setSigningKey("linjingc");
+        converter.setSigningKey("linjingc");//生成签名的key
         return converter;
     }
 
