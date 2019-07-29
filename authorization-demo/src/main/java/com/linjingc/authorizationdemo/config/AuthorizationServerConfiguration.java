@@ -139,7 +139,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
             User user = (User) authentication.getUserAuthentication().getPrincipal();
             additionalInfo.put("username", user.getUsername());
             additionalInfo.put("authorities_", user.getAuthorities());
-
+            additionalInfo.put("blog", "http://linjingc.top");
             ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
             return accessToken;
         }
