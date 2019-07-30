@@ -47,6 +47,7 @@ public class LoginController {
         //首先移除认证服务器上的session
         new SecurityContextLogoutHandler().logout(request, null, null);
         try {
+            //如果存在token 移除token 如果没有token表示successUrl转发
             String token = request.getHeader("Authorization");
             if (token != null) {
                 String tokenValue = token.replace("bearer ", "").trim();
@@ -57,10 +58,11 @@ public class LoginController {
                     //移除refresh_token
                     tokenStore.removeRefreshToken(oAuth2AccessToken.getRefreshToken());
                 }
+            }else{
+                //sending back to client app
+                response.sendRedirect(request.getHeader("referer"));
             }
-            //sending back to client app
             System.out.println("退出授权服务器");
-            response.sendRedirect(request.getHeader("referer"));
         } catch (Exception e) {
             e.printStackTrace();
         }

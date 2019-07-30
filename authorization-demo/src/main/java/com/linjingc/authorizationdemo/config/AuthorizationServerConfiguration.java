@@ -10,7 +10,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -20,11 +19,14 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
+import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,8 +73,14 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
      */
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+        //      将增强的token设置到增强链中
+        TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
+        tokenEnhancerChain.setTokenEnhancers(Arrays.asList(jwtTokenEnhancer(),jwtAccessTokenConverter()));
+
         endpoints
-                .tokenStore(tokenStore()).accessTokenConverter(jwtAccessTokenConverter())
+                .tokenStore(tokenStore())
+                //.accessTokenConverter(jwtAccessTokenConverter())
+                .tokenEnhancer(tokenEnhancerChain)
                 .authenticationManager(authenticationManager)
                 //允许 GET、POST 请求获取 token，即访问端点：oauth/token
                 .allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST)
@@ -93,7 +101,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
         //security.allowFormAuthenticationForClients().tokenKeyAccess("permitAll()")//公开/oauth/token的接口
         //        .checkTokenAccess("permitAll()")
         security.tokenKeyAccess("permitAll()")         //能够获取token的
-                .checkTokenAccess("isAuthenticated()");     //检测是否认证
+                .checkTokenAccess("permitAll()");     //检测是否认证
         //.allowFormAuthenticationForClients();
     }
 
@@ -117,9 +125,11 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     public JwtAccessTokenConverter jwtAccessTokenConverter() {
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
         //添加证书 非对称性加密
-        //KeyStoreKeyFactory factory = new KeyStoreKeyFactory(new ClassPathResource("keystore.jks"),"mypass".toCharArray());
-        //converter.setKeyPair(factory.getKeyPair("mytest"));
-        converter.setSigningKey("linjingc");//生成签名的key
+        KeyStoreKeyFactory factory = new KeyStoreKeyFactory(new ClassPathResource("keystore.jks"),"mypass".toCharArray());
+        converter.setKeyPair(factory.getKeyPair("mytest"));
+
+        //对称性加密
+        //converter.setSigningKey("linjingc");//生成签名的key
         return converter;
     }
 
@@ -130,7 +140,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
      * @return
      */
     @Bean
-    @ConditionalOnMissingBean(name = "jwtTokenEnhancer")
+    //@ConditionalOnMissingBean(name = "jwtTokenEnhancer")
     public TokenEnhancer jwtTokenEnhancer() {
         return new MyJwtTokenEnhancer();
     }
@@ -143,8 +153,8 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
         public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
             final Map<String, Object> additionalInfo = new HashMap<>();
             User user = (User) authentication.getUserAuthentication().getPrincipal();
-            additionalInfo.put("username", user.getUsername());
-            additionalInfo.put("authorities_", user.getAuthorities());
+            additionalInfo.put("登录名", user.getUsername());
+            additionalInfo.put("权限", user.getAuthorities());
             additionalInfo.put("blog", "http://linjingc.top");
             ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
             return accessToken;

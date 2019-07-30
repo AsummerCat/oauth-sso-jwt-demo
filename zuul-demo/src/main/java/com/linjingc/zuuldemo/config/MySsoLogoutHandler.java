@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 
 /**
- * @deprecated 自定义oauth2 注销方法
+ *  自定义oauth2 注销方法
  */
 
 @Component

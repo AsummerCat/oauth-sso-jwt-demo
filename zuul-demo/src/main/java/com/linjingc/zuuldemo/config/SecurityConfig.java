@@ -30,7 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/**.html", "/**.html", "/**.css", "/img/**", "/**.js", "/").permitAll()
                 .anyRequest().authenticated().
                 // this LogoutHandler invalidate user token from SSO
-                        and().logout().logoutSuccessUrl(logoutUrl);
+                        and().logout().addLogoutHandler(mySsoLogoutHandler).logoutSuccessUrl(logoutUrl);
                 //.deleteCookies("JSESSIONID", "ANY_OTHER_COOKIE").permitAll().and().csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 
     }
