@@ -48,6 +48,5 @@ security:
     resource:
       jwt:
         key-uri: ${auth-server}/oauth/token_key
-      prefer-token-info: false
 
 

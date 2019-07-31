@@ -22,3 +22,5 @@ eureka:
       defaultZone: http://admin:pass@localhost:9000/eureka
     healthcheck:
       enabled: true
+
+

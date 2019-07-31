@@ -124,12 +124,12 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     @Bean
     public JwtAccessTokenConverter jwtAccessTokenConverter() {
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
-        //添加证书 非对称性加密
+       // 添加证书 非对称性加密
         KeyStoreKeyFactory factory = new KeyStoreKeyFactory(new ClassPathResource("keystore.jks"),"mypass".toCharArray());
         converter.setKeyPair(factory.getKeyPair("mytest"));
 
-        //对称性加密
-        //converter.setSigningKey("linjingc");//生成签名的key
+//        //对称性加密
+//        converter.setSigningKey("linjingc");//生成签名的key
         return converter;
     }
 
